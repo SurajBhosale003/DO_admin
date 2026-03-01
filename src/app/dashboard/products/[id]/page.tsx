@@ -39,6 +39,22 @@ export default function EditProductPage() {
 
     const [filterOptions, setFilterOptions] = useState<{ categories: string[]; types: string[] }>({ categories: [], types: [] });
 
+    // Load persisted variant preference on mount
+    useEffect(() => {
+        const savedPref = localStorage.getItem("adminShowVariants");
+        if (savedPref !== null) {
+            setShowVariants(savedPref === "true");
+        }
+    }, []);
+
+    const toggleVariants = () => {
+        setShowVariants((prev) => {
+            const next = !prev;
+            localStorage.setItem("adminShowVariants", String(next));
+            return next;
+        });
+    };
+
     useEffect(() => {
         async function fetchFilters() {
             try {
@@ -257,7 +273,7 @@ export default function EditProductPage() {
                         <ImageIcon className="w-4 h-4 text-gray-500" /> Media Preview
                     </h2>
                     <button
-                        onClick={() => setShowVariants(!showVariants)}
+                        onClick={toggleVariants}
                         className={`text-sm font-medium flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${showVariants ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                     >
                         <LayoutGrid className="w-4 h-4" />
@@ -265,46 +281,53 @@ export default function EditProductPage() {
                     </button>
                 </div>
 
-                <div className={`p-6 grid gap-6 ${showVariants ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-                    {/* Main Image Container */}
-                    <div className={`bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center p-4 ${showVariants ? 'aspect-square lg:aspect-[4/3]' : 'aspect-video lg:aspect-[21/9]'}`}>
-                        {mainImageUrl ? (
-                            <img
-                                src={mainImageUrl}
-                                alt={product.name}
-                                className="w-full h-full object-contain mix-blend-multiply"
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center text-gray-400">
-                                <ImageIcon className="w-16 h-16 mb-3 opacity-50" />
-                                <span className="font-medium">No Primary Image</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Variant Previews Layout */}
-                    {showVariants && product.image && (
-                        <div className="grid grid-cols-2 gap-4 auto-rows-fr">
-                            {[
-                                { label: "Very High", src: product.image.veryHigh },
-                                { label: "High", src: product.image.high },
-                                { label: "Mid", src: product.image.mid },
-                                { label: "Low / Thumb", src: product.image.low || product.image.thumbnail }
-                            ].map((variant, idx) => (
-                                <div key={idx} className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm group">
-                                    <div className="bg-gray-50/80 p-2 border-b border-gray-100">
-                                        <p className="text-[10px] font-semibold text-gray-600 text-center uppercase tracking-wider">{variant.label}</p>
-                                    </div>
-                                    <div className="flex-1 p-2 flex items-center justify-center bg-gray-50/30 group-hover:bg-gray-50 transition-colors">
-                                        {variant.src ? (
-                                            <img src={variant.src} alt={variant.label} className="w-full h-32 object-contain mix-blend-multiply" />
-                                        ) : (
-                                            <span className="text-xs text-gray-400">N/A</span>
-                                        )}
-                                    </div>
+                <div className="p-4 sm:p-6 bg-gray-50/30">
+                    {!showVariants ? (
+                        /* State 1: Single Main Image */
+                        <div className="bg-white rounded-xl border border-gray-200 flex items-center justify-center p-4 aspect-video lg:aspect-[21/9] shadow-sm">
+                            {mainImageUrl ? (
+                                <img
+                                    src={mainImageUrl}
+                                    alt={product.name}
+                                    className="w-full h-full object-contain mix-blend-multiply"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center text-gray-400">
+                                    <ImageIcon className="w-16 h-16 mb-3 opacity-30" />
+                                    <span className="font-medium text-sm tracking-wide">No Primary Image</span>
                                 </div>
-                            ))}
+                            )}
                         </div>
+                    ) : (
+                        /* State 2: Four Variants Grid */
+                        product.image ? (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-fr">
+                                {[
+                                    { label: "Very High", src: product.image.veryHigh },
+                                    { label: "High", src: product.image.high },
+                                    { label: "Mid", src: product.image.mid },
+                                    { label: "Low / Thumb", src: product.image.low || product.image.thumbnail }
+                                ].map((variant, idx) => (
+                                    <div key={idx} className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="bg-gray-50 p-2.5 border-b border-gray-100 flex items-center justify-center">
+                                            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest leading-none">{variant.label}</p>
+                                        </div>
+                                        <div className="flex-1 p-4 flex items-center justify-center">
+                                            {variant.src ? (
+                                                <img src={variant.src} alt={variant.label} className="w-full h-32 sm:h-48 object-contain mix-blend-multiply" />
+                                            ) : (
+                                                <span className="text-xs font-medium text-gray-300">N/A</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center aspect-video lg:aspect-[21/9] text-gray-400 shadow-sm">
+                                <ImageIcon className="w-16 h-16 mb-3 opacity-30" />
+                                <span className="font-medium text-sm tracking-wide">No Variant Data</span>
+                            </div>
+                        )
                     )}
                 </div>
             </div>
