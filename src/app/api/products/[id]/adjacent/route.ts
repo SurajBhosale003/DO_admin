@@ -11,7 +11,7 @@ export async function GET(
         await connectDB();
 
         // Very lightweight query, only fetching _id and keeping exactly same sort as the list page
-        const products = await Product.find({}, '_id').sort({ createdAt: -1 }).lean();
+        const products = await Product.find({}, '_id').sort({ createdAt: -1 }).lean() as { _id: any }[];
 
         const currentIndex = products.findIndex(p => p._id.toString() === id);
 
@@ -26,7 +26,9 @@ export async function GET(
             success: true,
             data: {
                 prev: prevProduct,
-                next: nextProduct
+                next: nextProduct,
+                position: currentIndex + 1,
+                total: products.length
             }
         });
     } catch (error) {

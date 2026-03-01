@@ -27,7 +27,7 @@ export default function EditProductPage() {
     const { id } = useParams();
 
     const [product, setProduct] = useState<Product | null>(null);
-    const [adjacent, setAdjacent] = useState<{ prev: string | null, next: string | null }>({ prev: null, next: null });
+    const [adjacent, setAdjacent] = useState<{ prev: string | null, next: string | null, position: number | null, total: number | null }>({ prev: null, next: null, position: null, total: null });
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -167,168 +167,172 @@ export default function EditProductPage() {
     const thumbnailImageUrl = product.image?.thumbnail || product.image?.low || mainImageUrl;
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 pb-32"> {/* Increased padding bottom to accommodate fixed float bar */}
+        <div className="max-w-6xl mx-auto space-y-6 pb-32 pt-2 px-4 sm:px-6">
 
-            {/* Top Minimal Header (Back button & ID) */}
-            <div className="flex items-center gap-4 py-2 border-b border-gray-200">
-                <Link href="/dashboard/products" className="text-gray-400 hover:text-gray-900 transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-100">
+            {/* Top Header */}
+            <div className="flex items-center gap-4 mb-2">
+                <Link href="/dashboard/products" className="text-gray-400 hover:text-gray-900 transition-all p-2.5 bg-white rounded-full shadow-sm hover:shadow border border-gray-100 active:scale-95">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 leading-none">{product.name || "Unnamed Product"}</h1>
-                    <p className="text-sm text-gray-500 mt-1">ID: <span className="font-mono text-xs">{product._id}</span></p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-none">{product.name || "Unnamed Product"}</h1>
+                    <p className="text-xs text-gray-400 mt-1.5 font-medium flex items-center gap-2">
+                        <span className="bg-gray-100 px-2 py-0.5 rounded-full text-gray-500">ID</span>
+                        <span className="font-mono">{product._id}</span>
+                    </p>
                 </div>
             </div>
 
-            {/* Top Section: Form Data */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                    <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                        <Edit className="w-4 h-4 text-gray-500" />
-                        Quick Edit Details
-                    </h2>
-                </div>
+            {/* Apple-Style Dashboard Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                <form id="editProductForm" onSubmit={handleSave} className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Product Name</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={product.name}
-                            onChange={handleChange}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white placeholder-gray-400 font-medium transition-colors shadow-sm"
-                            required
-                        />
-                    </div>
+                {/* LEFT: Media Container (5 Cols) */}
+                <div className="lg:col-span-5">
+                    <div className="bg-white rounded-[2rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 sticky top-6">
+                        <div className="flex justify-between items-center mb-4 px-2">
+                            <h2 className="text-sm font-extrabold text-gray-800 flex items-center gap-2 uppercase tracking-wide">
+                                <ImageIcon className="w-4 h-4 text-amber-500" /> Media
+                            </h2>
+                            <button
+                                onClick={toggleVariants}
+                                className={`text-[11px] font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all active:scale-95 ${showVariants ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                            >
+                                <LayoutGrid className="w-3.5 h-3.5" />
+                                {showVariants ? "Variants" : "Main Only"}
+                            </button>
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Price (₹)</label>
-                        <input
-                            type="number"
-                            name="price"
-                            value={product.price}
-                            onChange={handleChange}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white font-medium shadow-sm transition-colors"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Category</label>
-                        <select
-                            name="category"
-                            value={product.category}
-                            onChange={handleChange}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white font-medium shadow-sm transition-colors"
-                        >
-                            {!filterOptions.categories.includes(product.category) && (
-                                <option value={product.category} className="capitalize">{product.category}</option>
-                            )}
-                            {filterOptions.categories.map((cat) => (
-                                <option key={cat} value={cat} className="capitalize">{cat}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Type</label>
-                        <input
-                            type="text"
-                            name="type"
-                            value={product.type}
-                            onChange={handleChange}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white font-medium shadow-sm transition-colors"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Serial Number</label>
-                        <input
-                            type="text"
-                            name="serialNumber"
-                            value={product.serialNumber}
-                            onChange={handleChange}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white font-medium shadow-sm transition-colors"
-                        />
-                    </div>
-
-                    <div className="lg:col-span-3">
-                        <label className="block text-sm font-semibold text-gray-800 mb-1.5">Detailed Description</label>
-                        <textarea
-                            name="description"
-                            value={product.description}
-                            onChange={handleChange}
-                            rows={3}
-                            className="block w-full rounded-lg border-gray-300 border focus:border-amber-500 focus:ring-amber-500 p-3 text-gray-900 bg-white font-medium leading-relaxed shadow-sm transition-colors resize-y"
-                            placeholder="Enter product description here..."
-                        />
-                    </div>
-                </form>
-            </div>
-
-            {/* Bottom Section: Media Viewer */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                    <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4 text-gray-500" /> Media Preview
-                    </h2>
-                    <button
-                        onClick={toggleVariants}
-                        className={`text-sm font-medium flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${showVariants ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                    >
-                        <LayoutGrid className="w-4 h-4" />
-                        {showVariants ? "Hide Variants" : "Show Variants"}
-                    </button>
-                </div>
-
-                <div className="p-4 sm:p-6 bg-gray-50/30">
-                    {!showVariants ? (
-                        /* State 1: Single Main Image */
-                        <div className="bg-white rounded-xl border border-gray-200 flex items-center justify-center p-4 aspect-video lg:aspect-[21/9] shadow-sm">
-                            {mainImageUrl ? (
-                                <img
-                                    src={mainImageUrl}
-                                    alt={product.name}
-                                    className="w-full h-full object-contain mix-blend-multiply"
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center text-gray-400">
-                                    <ImageIcon className="w-16 h-16 mb-3 opacity-30" />
-                                    <span className="font-medium text-sm tracking-wide">No Primary Image</span>
+                        <div className="bg-gray-50/50 rounded-[1.5rem] overflow-hidden border border-gray-100 p-2">
+                            {!showVariants ? (
+                                <div className="bg-white rounded-2xl flex items-center justify-center p-4 aspect-square shadow-sm">
+                                    {mainImageUrl ? (
+                                        <img src={mainImageUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply drop-shadow-sm" />
+                                    ) : (
+                                        <div className="flex flex-col items-center text-gray-300">
+                                            <ImageIcon className="w-12 h-12 mb-2 opacity-30" />
+                                            <span className="font-semibold text-xs tracking-wide">NO IMAGE</span>
+                                        </div>
+                                    )}
                                 </div>
+                            ) : (
+                                product.image ? (
+                                    <div className="grid grid-cols-2 gap-3 aspect-square auto-rows-fr">
+                                        {[
+                                            { label: "Very High", src: product.image.veryHigh },
+                                            { label: "High", src: product.image.high },
+                                            { label: "Mid", src: product.image.mid },
+                                            { label: "Thumbnail", src: product.image.low || product.image.thumbnail }
+                                        ].map((variant, idx) => (
+                                            <div key={idx} className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="bg-gray-50/80 py-1.5 border-b border-gray-100/50 flex items-center justify-center">
+                                                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{variant.label}</p>
+                                                </div>
+                                                <div className="flex-1 p-3 flex items-center justify-center">
+                                                    {variant.src ? (
+                                                        <img src={variant.src} alt={variant.label} className="w-full h-full object-contain mix-blend-multiply" />
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-gray-300">N/A</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bg-white rounded-2xl flex items-center justify-center aspect-square text-gray-300 shadow-sm">
+                                        <span className="font-semibold text-xs tracking-wide">NO VARIANTS</span>
+                                    </div>
+                                )
                             )}
                         </div>
-                    ) : (
-                        /* State 2: Four Variants Grid */
-                        product.image ? (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-fr">
-                                {[
-                                    { label: "Very High", src: product.image.veryHigh },
-                                    { label: "High", src: product.image.high },
-                                    { label: "Mid", src: product.image.mid },
-                                    { label: "Low / Thumb", src: product.image.low || product.image.thumbnail }
-                                ].map((variant, idx) => (
-                                    <div key={idx} className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                        <div className="bg-gray-50 p-2.5 border-b border-gray-100 flex items-center justify-center">
-                                            <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest leading-none">{variant.label}</p>
-                                        </div>
-                                        <div className="flex-1 p-4 flex items-center justify-center">
-                                            {variant.src ? (
-                                                <img src={variant.src} alt={variant.label} className="w-full h-32 sm:h-48 object-contain mix-blend-multiply" />
-                                            ) : (
-                                                <span className="text-xs font-medium text-gray-300">N/A</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
+                    </div>
+                </div>
+
+                {/* RIGHT: Form Data Container (7 Cols) */}
+                <div className="lg:col-span-7">
+                    <div className="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80">
+                        <div className="flex items-center justify-between mb-6 px-1">
+                            <h2 className="text-sm font-extrabold text-gray-800 flex items-center gap-2 uppercase tracking-wide">
+                                <Edit className="w-4 h-4 text-amber-500" /> Edit Details
+                            </h2>
+                        </div>
+
+                        <form id="editProductForm" onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 gap-5 px-1">
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Product Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={product.name}
+                                    onChange={handleChange}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-3.5 text-gray-900 font-semibold text-sm transition-all"
+                                    required
+                                />
                             </div>
-                        ) : (
-                            <div className="bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center aspect-video lg:aspect-[21/9] text-gray-400 shadow-sm">
-                                <ImageIcon className="w-16 h-16 mb-3 opacity-30" />
-                                <span className="font-medium text-sm tracking-wide">No Variant Data</span>
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Category</label>
+                                <select
+                                    name="category"
+                                    value={product.category}
+                                    onChange={handleChange}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-3.5 text-gray-900 font-semibold text-sm transition-all appearance-none cursor-pointer"
+                                >
+                                    {!filterOptions.categories.includes(product.category) && (
+                                        <option value={product.category} className="capitalize">{product.category}</option>
+                                    )}
+                                    {filterOptions.categories.map((cat) => (
+                                        <option key={cat} value={cat} className="capitalize">{cat}</option>
+                                    ))}
+                                </select>
                             </div>
-                        )
-                    )}
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Type</label>
+                                <input
+                                    type="text"
+                                    name="type"
+                                    value={product.type}
+                                    onChange={handleChange}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-3.5 text-gray-900 font-semibold text-sm transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Price (₹)</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    value={product.price}
+                                    onChange={handleChange}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-3.5 text-gray-900 font-semibold text-sm transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Serial Number</label>
+                                <input
+                                    type="text"
+                                    name="serialNumber"
+                                    value={product.serialNumber}
+                                    onChange={handleChange}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-3.5 text-gray-900 font-semibold text-sm transition-all font-mono tracking-wider"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Detailed Description</label>
+                                <textarea
+                                    name="description"
+                                    value={product.description}
+                                    onChange={handleChange}
+                                    rows={4}
+                                    className="block w-full bg-gray-50 rounded-2xl border-transparent focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 px-4 py-4 text-gray-900 font-medium text-sm transition-all resize-y leading-relaxed"
+                                    placeholder="Enter product description here..."
+                                />
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -356,7 +360,18 @@ export default function EditProductPage() {
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
-                        <div className="w-[1px] h-6 bg-gray-300/50 mx-1"></div>
+
+                        {/* Tracker */}
+                        {adjacent.total !== null ? (
+                            <div className="flex items-center justify-center px-2 sm:px-4 min-w-[4.5rem]">
+                                <span className="font-mono text-[11px] font-bold text-gray-400 tracking-widest whitespace-nowrap">
+                                    <span className="text-gray-800">{adjacent.position}</span> / {adjacent.total}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="w-[1px] h-6 bg-gray-300/50 mx-1"></div>
+                        )}
+
                         <button
                             onClick={() => adjacent.next && router.push(`/dashboard/products/${adjacent.next}`)}
                             disabled={!adjacent.next}
