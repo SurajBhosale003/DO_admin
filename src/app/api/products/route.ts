@@ -6,18 +6,29 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "100");
+        const limit = parseInt(searchParams.get("limit") || "40"); // Default 40 as requested
         const skip = (page - 1) * limit;
+
+        const category = searchParams.get("category");
+        const type = searchParams.get("type");
+
+        let filter: any = {};
+        if (category && category !== "all") {
+            filter.category = category;
+        }
+        if (type && type !== "all") {
+            filter.type = type;
+        }
 
         await connectDB();
 
-        const products = await Product.find({})
+        const products = await Product.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
 
-        const total = await Product.countDocuments();
+        const total = await Product.countDocuments(filter); // Total based on filter
 
         return NextResponse.json({
             success: true,
