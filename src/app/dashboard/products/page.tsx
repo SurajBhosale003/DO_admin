@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Edit, Image as ImageIcon, Loader2, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Edit, Image as ImageIcon, Loader2, ChevronLeft, ChevronRight, Filter, Search } from "lucide-react";
 
 interface Product {
     _id: string;
@@ -34,6 +34,8 @@ export default function ProductsPage() {
 
     const [category, setCategory] = useState("all");
     const [type, setType] = useState("all");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
 
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({ categories: [], types: [] });
 
@@ -53,6 +55,17 @@ export default function ProductsPage() {
         fetchFilters();
     }, []);
 
+    // Debounce Search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (debouncedSearch !== searchQuery) {
+                setDebouncedSearch(searchQuery);
+                setPage(1); // Reset page on new search
+            }
+        }, 400); // 400ms debounce
+        return () => clearTimeout(handler);
+    }, [searchQuery, debouncedSearch]);
+
     // Fetch products whenever page, category, or type changes
     useEffect(() => {
         async function fetchProducts() {
@@ -64,6 +77,7 @@ export default function ProductsPage() {
                 });
                 if (category !== "all") params.append("category", category);
                 if (type !== "all") params.append("type", type);
+                if (debouncedSearch) params.append("search", debouncedSearch);
 
                 const res = await fetch(`/api/products?${params.toString()}`);
                 const data = await res.json();
@@ -80,7 +94,7 @@ export default function ProductsPage() {
             }
         }
         fetchProducts();
-    }, [page, category, type]);
+    }, [page, category, type, debouncedSearch]);
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setCategory(e.target.value);
@@ -99,10 +113,25 @@ export default function ProductsPage() {
                     Products <span className="text-gray-500 text-xl font-medium">({totalProducts} actual items)</span>
                 </h1>
 
-                {/* Filters */}
+                {/* Filters & Search */}
                 <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+
+                    {/* Search Bar */}
+                    <div className="flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-md px-3 py-1.5 focus-within:ring-2 focus-within:ring-amber-500 mr-2">
+                        <Search className="w-4 h-4 text-gray-500" />
+                        <input
+                            type="text"
+                            placeholder="Search by name or serial..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent text-sm w-48 sm:w-64 focus:outline-none text-gray-900 placeholder-gray-400"
+                        />
+                    </div>
+
+                    <div className="hidden sm:block w-[1px] h-6 bg-gray-200 mx-1"></div>
+
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mr-2">
-                        <Filter className="w-4 h-4" />
+                        <Filter className="w-4 h-4 text-gray-500" />
                         Filters:
                     </div>
                     <select

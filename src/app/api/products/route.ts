@@ -11,6 +11,7 @@ export async function GET(request: Request) {
 
         const category = searchParams.get("category");
         const type = searchParams.get("type");
+        const querySearch = searchParams.get("search");
 
         let filter: any = {};
         if (category && category !== "all") {
@@ -18,6 +19,12 @@ export async function GET(request: Request) {
         }
         if (type && type !== "all") {
             filter.type = type;
+        }
+        if (querySearch) {
+            filter.$or = [
+                { name: { $regex: querySearch, $options: "i" } },
+                { serialNumber: { $regex: querySearch, $options: "i" } }
+            ];
         }
 
         await connectDB();
