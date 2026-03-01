@@ -58,3 +58,29 @@ export async function PUT(
         );
     }
 }
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const id = (await params).id;
+        await connectDB();
+        const product = await Product.findByIdAndDelete(id);
+
+        if (!product) {
+            return NextResponse.json(
+                { success: false, message: "Product not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({ success: true, message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        return NextResponse.json(
+            { success: false, message: "Server error" },
+            { status: 500 }
+        );
+    }
+}
