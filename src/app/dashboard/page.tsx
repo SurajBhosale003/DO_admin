@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Settings2, BarChart3, Users } from "lucide-react";
+import { Package, Settings2, BarChart3, Users, MessageSquare } from "lucide-react";
 
 export default function DashboardPage() {
     return (
@@ -37,16 +37,25 @@ export default function DashboardPage() {
                     </div>
                 </Link>
 
-                {/* Coming Soon Cards */}
-                <div className="bg-gray-50/50 border border-gray-200 border-dashed p-6 flex flex-col h-full relative cursor-not-allowed opacity-60">
-                    <div className="bg-gray-200 self-start p-3.5 mb-6 text-gray-500 relative z-10">
-                        <Users className="w-6 h-6 sm:w-8 sm:h-8" />
+                {/* Active Card - Leads */}
+                <Link href="/dashboard/leads" className="group block h-full">
+                    <div className="bg-white border border-gray-200/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] hover:border-amber-200/50 transition-all duration-300 p-6 flex flex-col h-full relative overflow-hidden active:scale-[0.99] cursor-pointer">
+                        <div className="absolute top-0 right-0 p-8 bg-gradient-to-bl from-amber-50 to-transparent -translate-y-1/2 translate-x-1/2 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700 pointer-events-none"></div>
+
+                        <div className="bg-amber-50 self-start p-3.5 mb-6 text-amber-600 shadow-sm border border-amber-100/50 relative z-10 transition-transform group-hover:scale-110 duration-300">
+                            <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8" />
+                        </div>
+
+                        <div className="relative z-10 flex-grow">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors">Manage Leads</h2>
+                            <p className="text-sm font-medium text-gray-500 leading-relaxed">View and respond to customer inquiries from the website and pop-up forms.</p>
+                        </div>
+
+                        <div className="mt-6 flex items-center text-amber-600 text-sm font-bold tracking-wide uppercase opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 relative z-10">
+                            View Inquiries &rarr;
+                        </div>
                     </div>
-                    <div className="relative z-10 flex-grow">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Customers</h2>
-                        <p className="text-sm font-medium text-gray-500 leading-relaxed">Manage user accounts and history. <span className="text-amber-600 block mt-1">(Coming Soon)</span></p>
-                    </div>
-                </div>
+                </Link>
 
                 <div className="bg-gray-50/50 border border-gray-200 border-dashed p-6 flex flex-col h-full relative cursor-not-allowed opacity-60">
                     <div className="bg-gray-200 self-start p-3.5 mb-6 text-gray-500 relative z-10">

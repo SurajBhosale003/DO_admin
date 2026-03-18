@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Home, Package } from "lucide-react";
+import { LogOut, Home, Package, MessageSquare } from "lucide-react";
 
 export default function DashboardLayout({
     children,
@@ -40,6 +40,10 @@ export default function DashboardLayout({
                                     <Package className="w-4 h-4" />
                                     Products
                                 </Link>
+                                <Link href="/dashboard/leads" className="text-gray-500 hover:text-amber-600 hover:bg-amber-50 px-4 py-2 font-bold text-sm flex items-center gap-2 transition-colors">
+                                    <MessageSquare className="w-4 h-4" />
+                                    Leads
+                                </Link>
                             </nav>
                         </div>
 
@@ -62,9 +66,13 @@ export default function DashboardLayout({
                         <Home className="w-4 h-4" />
                         Overview
                     </Link>
-                    <Link href="/dashboard/products" className="flex-1 text-center py-3 text-xs font-bold text-gray-600 flex flex-col items-center gap-1 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                    <Link href="/dashboard/products" className="flex-1 text-center py-3 text-xs font-bold text-gray-600 flex flex-col items-center gap-1 hover:text-amber-600 hover:bg-amber-50 border-r border-gray-100 transition-colors">
                         <Package className="w-4 h-4" />
                         Products
+                    </Link>
+                    <Link href="/dashboard/leads" className="flex-1 text-center py-3 text-xs font-bold text-gray-600 flex flex-col items-center gap-1 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                        <MessageSquare className="w-4 h-4" />
+                        Leads
                     </Link>
                 </div>
             </header>
