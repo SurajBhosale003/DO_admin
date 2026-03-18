@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongoose";
 import Product from "@/lib/models/Product";
+import { normalizeProductImages } from "@/lib/image-utils";
 
 export async function GET(request: Request) {
     try {
@@ -29,13 +30,17 @@ export async function GET(request: Request) {
 
         await connectDB();
 
-        const products = await Product.find(filter)
+        let products = await Product.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
 
         const total = await Product.countDocuments(filter); // Total based on filter
+
+        if (products && products.length > 0) {
+            products = products.map((p: any) => normalizeProductImages(JSON.parse(JSON.stringify(p))));
+        }
 
         return NextResponse.json({
             success: true,

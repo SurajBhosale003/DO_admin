@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Edit, Image as ImageIcon, Loader2, ChevronLeft, ChevronRight, Filter, Search, X, Eye, EyeOff, CheckSquare, Square, Settings2 } from "lucide-react";
+import { getProductImage } from "@/lib/image-utils";
 
 interface Product {
     _id: string;
@@ -321,15 +322,11 @@ export default function ProductsPage() {
                                     <div className="group relative w-full aspect-[4/5] sm:aspect-square bg-gray-100 overflow-hidden cursor-pointer shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.15)] transition-all duration-300 active:scale-[0.99] border border-gray-200/60">
                                         {/* Full Bleed Image */}
                                         <div className="absolute inset-0 flex items-center justify-center bg-white">
-                                            {product.image?.mid || product.image?.thumbnail || product.image?.low ? (
-                                                <img
-                                                    src={product.image.mid || product.image.thumbnail || product.image.low}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-                                                />
-                                            ) : (
-                                                <ImageIcon className="w-10 h-10 text-gray-300" />
-                                            )}
+                                            <img
+                                                src={getProductImage(product.image, 'mid')}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+                                            />
                                         </div>
 
                                         {/* Dark Gradient Overlay for Text Readability - Only visible if AT LEAST ONE text layer is showing */}

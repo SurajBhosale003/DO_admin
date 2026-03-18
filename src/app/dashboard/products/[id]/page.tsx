@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, ChevronLeft, ChevronRight, LayoutGrid, Edit, Trash2, CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { getProductImage } from "@/lib/image-utils";
 import Link from "next/link";
 
 interface Product {
@@ -163,8 +164,8 @@ export default function EditProductPage() {
         );
     }
 
-    const mainImageUrl = product.image?.high || product.image?.veryHigh || product.image?.mid || product.image?.thumbnail;
-    const thumbnailImageUrl = product.image?.thumbnail || product.image?.low || mainImageUrl;
+    const mainImageUrl = getProductImage(product.image, 'high');
+    const thumbnailImageUrl = getProductImage(product.image, 'thumbnail');
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 pb-32 pt-2 px-4 sm:px-6">

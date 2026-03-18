@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongoose";
 import Product from "@/lib/models/Product";
+import { normalizeProductImages } from "@/lib/image-utils";
 
 export async function GET(
     request: Request,
@@ -18,7 +19,7 @@ export async function GET(
             );
         }
 
-        return NextResponse.json({ success: true, data: product });
+        return NextResponse.json({ success: true, data: normalizeProductImages(product) });
     } catch (error) {
         console.error("Error fetching product:", error);
         return NextResponse.json(
@@ -40,7 +41,7 @@ export async function PUT(
         const product = await Product.findByIdAndUpdate(id, updateData, {
             new: true,
             runValidators: true,
-        });
+        }).lean();
 
         if (!product) {
             return NextResponse.json(
@@ -49,7 +50,7 @@ export async function PUT(
             );
         }
 
-        return NextResponse.json({ success: true, data: product });
+        return NextResponse.json({ success: true, data: normalizeProductImages(JSON.parse(JSON.stringify(product))) });
     } catch (error) {
         console.error("Error updating product:", error);
         return NextResponse.json(
